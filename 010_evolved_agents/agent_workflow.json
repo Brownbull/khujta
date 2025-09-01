@@ -1,0 +1,42 @@
+{
+  "workflow_id": "uuid",
+  "name": "Retrieve & Adapt Memory",
+  "description": "Basic flow: retrieve a NeuroBlock, adapt it, and re-store it with provenance.",
+
+  "steps": [
+    {
+      "step_id": "1",
+      "agent": "MemoryRetriever",
+      "action": "retrieve",
+      "inputs": ["block_id"],
+      "outputs": ["raw_block"]
+    },
+    {
+      "step_id": "2",
+      "agent": "MemoryAdapter",
+      "action": "transform",
+      "inputs": ["raw_block", "adaptation_params"],
+      "outputs": ["adapted_block"]
+    },
+    {
+      "step_id": "3",
+      "agent": "Validator",
+      "action": "validate",
+      "inputs": ["adapted_block"],
+      "outputs": ["validation_proof"]
+    },
+    {
+      "step_id": "4",
+      "agent": "MemoryStorer",
+      "action": "store",
+      "inputs": ["adapted_block", "validation_proof"],
+      "outputs": ["block_id_new"]
+    }
+  ],
+
+  "control": {
+    "on_failure": "rollback|skip|halt",
+    "retry_limit": 3,
+    "logging": "audit-trail"
+  }
+}

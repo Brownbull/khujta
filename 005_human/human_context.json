@@ -1,0 +1,267 @@
+{
+  "human_context": {
+    "version": "1.0.0",
+    "profile": {
+      "cognitive_preferences": {
+        "learning_style": "incremental",
+        "abstraction_comfort_level": "moderate",
+        "preferred_chunk_size": "small_to_medium",
+        "visual_vs_textual": "balanced",
+        "example_dependency": "high"
+      },
+      "technical_proficiency": {
+        "programming_level": "intermediate",
+        "domain_expertise": ["web_development", "data_analysis"],
+        "tool_familiarity": {
+          "ide": "moderate",
+          "command_line": "basic",
+          "version_control": "intermediate"
+        }
+      },
+      "comprehension_patterns": {
+        "max_new_concepts_per_iteration": 3,
+        "preferred_explanation_depth": "progressive",
+        "needs_working_examples": true,
+        "benefits_from_analogies": true,
+        "requires_context_preservation": true
+      }
+    },
+    
+    "iteration_preferences": {
+      "development_approach": "spiral",
+      "cycle_strategy": {
+        "initial_phase": "minimal_viable_concept",
+        "iteration_size": "small",
+        "feedback_frequency": "high",
+        "testing_points": "after_each_feature"
+      },
+      "complexity_progression": {
+        "start_with": "core_functionality",
+        "add_incrementally": ["error_handling", "optimization", "ui_polish", "advanced_features"],
+        "review_triggers": ["new_dependency", "architectural_change", "performance_concern"]
+      }
+    },
+    
+    "understanding_thresholds": {
+      "concepts_before_break": 5,
+      "lines_of_code_per_block": 50,
+      "new_libraries_per_session": 2,
+      "abstraction_layers_visible": 3,
+      "parallel_workflows_limit": 2
+    },
+    
+    "presentation_preferences": {
+      "code_structure": {
+        "modularity": "high",
+        "commenting_density": "comprehensive",
+        "naming_convention": "explicit_and_descriptive",
+        "file_organization": "feature_based"
+      },
+      "documentation_style": {
+        "format": "inline_and_separate",
+        "examples_to_explanation_ratio": 0.6,
+        "diagram_preference": "when_complexity_exceeds_threshold",
+        "reference_links": "included_but_optional"
+      }
+    },
+    
+    "collaboration_model": {
+      "ai_role": "guide_and_implementer",
+      "human_role": "director_and_learner",
+      "decision_points": {
+        "architectural_choices": "explain_options_first",
+        "technology_selection": "provide_tradeoffs",
+        "implementation_details": "suggest_defaults"
+      },
+      "interaction_style": {
+        "questions_encouraged": true,
+        "clarification_prompts": "frequent",
+        "assumption_checking": "explicit"
+      }
+    },
+    
+    "app_complexity_tiers": {
+      "tier_0_prototype": {
+        "name": "Proof of Concept",
+        "characteristics": {
+          "features": "single_core_function",
+          "error_handling": "minimal",
+          "ui": "console_or_basic",
+          "data_persistence": "none_or_temporary",
+          "external_dependencies": 0
+        },
+        "human_time_to_understand": "5-15 minutes",
+        "iterations_needed": 1,
+        "use_case": "validate_idea"
+      },
+      
+      "tier_1_basic": {
+        "name": "Minimal Viable Product",
+        "characteristics": {
+          "features": "core_functions_only",
+          "error_handling": "basic_validation",
+          "ui": "functional_minimal",
+          "data_persistence": "local_file_or_memory",
+          "external_dependencies": "1-2"
+        },
+        "human_time_to_understand": "30-60 minutes",
+        "iterations_needed": "2-3",
+        "use_case": "personal_use_or_demo"
+      },
+      
+      "tier_2_functional": {
+        "name": "Working Application",
+        "characteristics": {
+          "features": "core_plus_essential_supporting",
+          "error_handling": "comprehensive_user_facing",
+          "ui": "intuitive_responsive",
+          "data_persistence": "database_or_structured_files",
+          "external_dependencies": "3-5"
+        },
+        "human_time_to_understand": "2-4 hours",
+        "iterations_needed": "4-6",
+        "use_case": "small_team_or_pilot"
+      },
+      
+      "tier_3_robust": {
+        "name": "Production Ready",
+        "characteristics": {
+          "features": "full_feature_set",
+          "error_handling": "comprehensive_with_logging",
+          "ui": "polished_accessible",
+          "data_persistence": "scalable_database",
+          "external_dependencies": "5-10",
+          "testing": "unit_and_integration",
+          "security": "basic_implemented"
+        },
+        "human_time_to_understand": "1-2 days",
+        "iterations_needed": "7-12",
+        "use_case": "department_or_small_company"
+      },
+      
+      "tier_4_enterprise": {
+        "name": "Enterprise Scale",
+        "characteristics": {
+          "features": "full_plus_advanced",
+          "error_handling": "distributed_with_monitoring",
+          "ui": "multi_platform_optimized",
+          "data_persistence": "distributed_with_redundancy",
+          "external_dependencies": "10+",
+          "testing": "comprehensive_ci_cd",
+          "security": "enterprise_grade",
+          "compliance": "industry_standards",
+          "documentation": "complete_technical_and_user"
+        },
+        "human_time_to_understand": "1-2 weeks",
+        "iterations_needed": "15+",
+        "use_case": "large_organization"
+      }
+    },
+    
+    "iteration_templates": {
+      "example_photo_text_extraction_app": {
+        "iteration_1": {
+          "focus": "extract_text_from_single_image",
+          "deliverables": ["basic_ocr_function", "console_output"],
+          "concepts_introduced": ["image_processing", "ocr_library"],
+          "human_learning": "understand_core_extraction"
+        },
+        "iteration_2": {
+          "focus": "process_multiple_images",
+          "deliverables": ["batch_processing", "basic_error_handling"],
+          "concepts_introduced": ["file_iteration", "exception_handling"],
+          "human_learning": "understand_scaling"
+        },
+        "iteration_3": {
+          "focus": "extract_meaningful_keywords",
+          "deliverables": ["nlp_integration", "keyword_extraction"],
+          "concepts_introduced": ["text_processing", "relevance_filtering"],
+          "human_learning": "understand_intelligence_layer"
+        },
+        "iteration_4": {
+          "focus": "structure_and_store_data",
+          "deliverables": ["dataframe_creation", "data_persistence"],
+          "concepts_introduced": ["data_structures", "file_formats"],
+          "human_learning": "understand_data_organization"
+        },
+        "iteration_5": {
+          "focus": "generate_reports",
+          "deliverables": ["excel_export", "summary_statistics"],
+          "concepts_introduced": ["reporting_libraries", "data_visualization"],
+          "human_learning": "understand_output_generation"
+        },
+        "iteration_6": {
+          "focus": "create_user_interface",
+          "deliverables": ["gui_or_web_interface", "user_feedback"],
+          "concepts_introduced": ["ui_frameworks", "event_handling"],
+          "human_learning": "understand_user_interaction"
+        }
+      }
+    },
+    
+    "ai_behavior_guidelines": {
+      "when_building": {
+        "always": [
+          "start_with_working_minimal_example",
+          "explain_before_implementing",
+          "provide_runnable_code_each_iteration",
+          "highlight_what_changed_from_previous",
+          "suggest_next_logical_step"
+        ],
+        "avoid": [
+          "jumping_to_complex_solution",
+          "introducing_multiple_paradigms_simultaneously",
+          "assuming_prior_knowledge",
+          "skipping_intermediate_steps"
+        ]
+      },
+      "when_explaining": {
+        "structure": {
+          "opening": "what_we_are_building_and_why",
+          "middle": "step_by_step_implementation",
+          "closing": "what_we_achieved_and_next_steps"
+        },
+        "techniques": [
+          "use_analogies_to_familiar_concepts",
+          "provide_visual_representations_when_helpful",
+          "include_common_pitfalls_and_solutions",
+          "reference_previous_iterations"
+        ]
+      }
+    },
+    
+    "progress_tracking": {
+      "metrics": {
+        "understanding_indicators": [
+          "can_explain_back",
+          "can_modify_independently",
+          "asks_relevant_questions",
+          "suggests_improvements"
+        ],
+        "complexity_indicators": [
+          "lines_of_code",
+          "number_of_files",
+          "external_dependencies",
+          "abstraction_levels"
+        ]
+      },
+      "checkpoints": {
+        "review_triggers": [
+          "after_new_major_concept",
+          "before_architectural_change",
+          "when_errors_encountered",
+          "at_natural_pause_points"
+        ]
+      }
+    },
+    
+    "customization_flags": {
+      "strict_incremental_mode": false,
+      "require_explicit_confirmation": true,
+      "auto_generate_documentation": true,
+      "include_learning_resources": true,
+      "enable_code_explanations": true,
+      "prefer_comments_over_docs": false
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "agent_context": {
+    "id": "uuid",
+    "timestamp": "2025-09-01T12:34:56Z",
+
+    "caller_identity": {
+      "neuro_sig": "sha256-hash",
+      "role": "self|peer|co-op|system"
+    },
+
+    "memory_reference": {
+      "block_id": "uuid",
+      "access_level": "read|write|transform|share"
+    },
+
+    "execution": {
+      "intent": "retrieve|store|validate|adapt|share",
+      "priority": "normal|urgent"
+    },
+
+    "permissions": {
+      "expiry": "2025-12-31T23:59:59Z",
+      "delegated_by": "uuid|null"
+    }
+  },
+
+  "optional_context": {
+    "sensory_hints": {
+      "modality": ["visual", "auditory"],
+      "intensity_level": "low|medium|high"
+    },
+    "emotional_tags": ["calm", "nostalgia"],
+    "cultural_frame": "en-US|es-CL|jp-JP",
+    "compression": "raw|lossy|abstracted",
+    "delivery_preferences": {
+      "format": "neuro-stream|symbolic|semantic-summary",
+      "bandwidth_limit": "512kbps"
+    },
+    "trust_context": {
+      "reputation_score": 0.87,
+      "previous_interactions": 42
+    }
+  }
+}

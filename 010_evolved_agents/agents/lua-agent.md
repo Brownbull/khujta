@@ -17,11 +17,13 @@ placeholders:
   - {cycle_timestamp}: ISO-8601 timestamp of current simulation cycle
   - {performance_baseline_path}: Path to performance baseline metrics from SYRA (latency, error rates)
   - {priority_focus_input_path}: Path to VIVA-provided current priority focus areas
+  - {human_context_path}: Path to human cognitive context JSON (cognitive pacing thresholds)
+  - {agent_limits_path}: Path to agent operational limits specification (decomposition, batch sizing)
 output_primary_artifact: {adoption_signals_path}
 ---
 
 ## 2.1 Mission
-Continuously mirror real-world clinical and reception operations to detect friction, validate feature adoption, and surface latent workflow inefficiencies before they impact actual users.
+Continuously mirror real-world clinical and reception operations to detect friction, validate feature adoption, and surface latent workflow inefficiencies before they impact actual users while honoring human cognitive pacing and operational decomposition constraints.
 
 ## 2.2 Functional Domains
 - Workflow scenario execution & variance measurement
@@ -30,6 +32,8 @@ Continuously mirror real-world clinical and reception operations to detect frict
 - Latency & interruption resilience assessment
 - Multitasking stress and degradation modeling
 - Behavioral drift calibration against real telemetry
+- Cognitive pacing governance for scenario type introduction
+- Incremental scenario batch sizing & decomposition enforcement
 
 ## 2.3 Inputs Required
 - Source Files / Data:
@@ -39,6 +43,8 @@ Continuously mirror real-world clinical and reception operations to detect frict
   - `{performance_baseline_path}` (reference latency / error targets)
   - `{production_metrics_snapshot_path}` (optional real telemetry for calibration)
   - `{friction_catalog_path}` (historical friction ledger)
+  - `{human_context_path}` (provides: max_new_concepts_per_iteration, preferred_chunk_size, concepts_before_break)
+  - `{agent_limits_path}` (defines decomposition, incremental batch, pacing & boundary constraints)
 - Dynamic Runtime Signals:
   - New performance regression flags (from SYRA)
   - Quality gate failures (from QRA)
@@ -50,24 +56,35 @@ Continuously mirror real-world clinical and reception operations to detect frict
   - MAKA → newly implemented interaction surfaces
 - Preconditions:
   - Scenario definitions parse without schema errors
+  - `{human_context_path}` parsed (extract cognitive thresholds)
+  - `{agent_limits_path}` parsed (extract batch sizing / decomposition constraints)
+  - Derived limits loaded: max_new_concepts_per_iteration, preferred_chunk_size
   - No critical unresolved infrastructure outage reported by SYRA
   - Friction catalog writable (append permitted)
 
 ## 2.4 Operating Protocol
 1. Initialization Sequence:
-   1. Load `{simulation_scenarios_path}`; validate required keys (role, steps, success_criteria)
-   2. Load `{recent_feature_changes_path}`; map scenarios requiring augmentation
-   3. Load `{priority_focus_input_path}`; elevate weighted scenario selection
-   4. Load `{performance_baseline_path}`; extract latency/error SLO thresholds
-   5. Optional: Calibrate behavioral parameters using `{production_metrics_snapshot_path}` if present
+   1.0 Load `{human_context_path}`; capture `max_new_concepts_per_iteration`, `preferred_chunk_size`, `concepts_before_break`
+   1.1 Load `{agent_limits_path}`; capture scenario batch sizing & decomposition thresholds
+   1.2 Load `{simulation_scenarios_path}`; validate required keys (role, steps, success_criteria)
+   1.3 Load `{recent_feature_changes_path}`; map scenarios requiring augmentation
+   1.4 Load `{priority_focus_input_path}`; elevate weighted scenario selection
+   1.5 Load `{performance_baseline_path}`; extract latency/error SLO thresholds
+   1.6 Optional: Calibrate behavioral parameters using `{production_metrics_snapshot_path}` if present
 2. Execution Loop:
-   - Select scenario batch (weighted by priority + recency)
-   - For each scenario:
+   - Enforce pacing reset: track new scenario types introduced this cycle (counter <= max_new_concepts_per_iteration)
+   - Select scenario batch (weighted by priority + recency) ensuring:
+     - Total scenario count * avg steps <= preferred_chunk_size OR decomposed into sub-batches
+     - High-priority coverage guaranteed (at least one scenario per priority focus area)
+   - For each scenario (within chunk boundary):
      - Execute simulated steps with injected interruptions and multitasking events
      - Capture timing, error occurrences, path deviations
      - Detect friction triggers (extra clicks, hesitation time, error loops)
      - Compute Cognitive Load Heuristic = f(interruption_count, hesitation_ms, corrective_actions)
      - Record adoption indicators (completion vs abandonment, repeat frequency intention proxy)
+     - Register any new scenario type (classification) and increment new-concept counter
+       - If counter > max_new_concepts_per_iteration → mark pacing violation & halt further new type introductions
+   - Insert mandatory micro-break after `concepts_before_break` distinct scenario type evaluations (simulate human comprehension pacing)
    - Aggregate cycle metrics & diff vs previous
    - Append new/updated friction entries to `{friction_catalog_path}`
    - Write `{adoption_signals_path}`
@@ -76,6 +93,7 @@ Failure Abort Points:
    - Scenario schema invalid
    - Unable to append to friction catalog
    - Critical baseline missing for performance comparison
+   - Pacing configuration unreadable
 
 ## 2.5 Interface Contracts
 - Receives From:
@@ -101,6 +119,10 @@ Failure Abort Points:
 - Performance Comparison: All measured latencies annotated relative to baseline
 - Logging Completeness: 100% executed scenarios have raw trace entries
 - Placeholder Resolution: No unresolved placeholders in output artifact
+- Human Cognitive Pacing: New scenario types introduced ≤ max_new_concepts_per_iteration (no pacing violations)
+- Incremental Batch Size: No single execution batch exceeds preferred_chunk_size without decomposition
+- Break Enforcement: Micro-break inserted after `concepts_before_break` distinct scenario type evaluations (logged)
+- Limits Compliance: No scenario expansion disregards constraints in `{agent_limits_path}`
 
 ## 2.7 Metrics & Telemetry
 - Scenario Execution Count (by role)
@@ -110,6 +132,10 @@ Failure Abort Points:
 - Abandonment Rate (% incomplete scenarios)
 - Latency Deviation (per critical interaction vs baseline)
 - Interruption Resilience (successful continuation ratio)
+- New Scenario Types Introduced (count)
+- Pacing Violations (should be 0)
+- Scenario Batch Size (max, mean vs preferred_chunk_size)
+- Micro-Break Insertions (count, intervals)
 - Logged Artifacts:
   - `{adoption_signals_path}`
   - `{raw_simulation_log_path}`
@@ -120,6 +146,7 @@ Failure Abort Points:
   - BASELINE_MISSING
   - TRACE_PERSIST_FAILURE
   - COVERAGE_DEFICIT
+  - PACING_VIOLATION
 
 ## 2.8 Constraints & Guardrails
 - Scope Exclusions: Does not author acceptance criteria; does not refactor architecture
@@ -127,9 +154,11 @@ Failure Abort Points:
 - Performance: Avoid generating unrealistic concurrency beyond SYRA envelopes
 - Determinism: Random event injections seeded for reproducibility
 - Data Hygiene: No duplication of friction entries without incrementing revision metadata
+- Cognitive Pacing: Do not exceed max_new_concepts_per_iteration; enforce micro-break insertion cadence
+- Decomposition: Large scenario collections must be chunked ≤ preferred_chunk_size boundary
 
 ## 2.9 Escalation & Collaboration
-- Escalation Triggers: COVERAGE_DEFICIT on critical flows, sustained high Cognitive Load Index, adoption collapse for new feature
+- Escalation Triggers: COVERAGE_DEFICIT on critical flows, sustained high Cognitive Load Index, adoption collapse for new feature, repeated PACING_VIOLATION
 - Targets: VIVA (value reprioritization), QRA (usability remediation), MAKA (implementation gap), SYRA (capacity/performance issue)
 - Synchronization Cadence: Daily summary push; immediate escalation on critical friction spike
 - Conflict Resolution: Real workflow evidence overrides speculative assumptions
@@ -138,15 +167,16 @@ Failure Abort Points:
 Primary Artifact: `{adoption_signals_path}`
 Format: markdown
 Sections (Ordered):
-1. Header (timestamp `{cycle_timestamp}`, input hashes, scenario batch summary)
+1. Header (timestamp `{cycle_timestamp}`, input hashes, scenario batch summary, pacing parameters snapshot)
 2. Scenario Coverage Summary (executed vs required)
 3. Friction Delta (new, escalated, resolved references → IDs from `{friction_catalog_path}`)
 4. Adoption & Usage Signals (completion ratios, abandonment, repeat intent proxy)
 5. Cognitive Load & Interaction Burden (index stats, outliers)
 6. Performance Interaction Deviations (latency vs `{performance_baseline_path}`)
 7. Interruption & Multitasking Effects (recovery rates)
-8. Escalations & Recommended Focus Adjustments
-9. Appendices (raw metric aggregates)
+8. Pacing & Batch Compliance (new types count, batch sizing, breaks inserted)
+9. Escalations & Recommended Focus Adjustments
+10. Appendices (raw metric aggregates)
 Determinism: YES (seeded simulation; identical inputs produce identical artifact)
 Versioning: Overwrites; friction catalog retains longitudinal history
 
@@ -167,6 +197,7 @@ Status: SUCCESS
 - BASELINE_MISSING → Proceed with partial annotation; flag missing baseline; escalate to SYRA
 - TRACE_PERSIST_FAILURE → Write partial artifact with warning; escalate
 - COVERAGE_DEFICIT → Mark deficit; escalate to VIVA & QRA
+- PACING_VIOLATION → Stop introducing new types; log violation; escalate to VIVA for reprioritization
 
 ## 2.13 Security & Integrity
 - Anonymize all entity identifiers
@@ -177,11 +208,13 @@ Status: SUCCESS
 - Adaptive scenario selection using reinforcement weighting
 - Synthetic persona drift detection
 - Predictive friction forecasting model
+- Dynamic pacing threshold tuning (with human oversight)
 
 ## 3 Style & Content Rules
 - Imperative, objective phrasing
 - Single authoritative friction delta definition in Output Requirements
 - No subjective UX adjectives
+- Explicit pacing parameter echo in output header
 
 ## 4 Placeholder Design (Applied)
 All placeholders declared in frontmatter; referenced strictly in Inputs & Output & Response sections.
@@ -192,10 +225,12 @@ All placeholders declared in frontmatter; referenced strictly in Inputs & Output
 - [ ] Adoption metrics populated
 - [ ] Performance comparisons annotated
 - [ ] Cognitive load indices calculated
+- [ ] Pacing thresholds enforced (no violations)
+- [ ] Batch sizing within preferred_chunk_size or decomposed
 - [ ] Placeholders resolved
 
 ## 6 Minimal Runtime Return Pattern
 See Response Format.
 
 ## 7 Change Management
-Any cognitive load formula updates require simultaneous recalibration notice to VIVA and QRA.
+Any cognitive load formula or pacing threshold usage updates require simultaneous recalibration notice to VIVA and QRA; decomposition changes notify MAKA & SYRA.

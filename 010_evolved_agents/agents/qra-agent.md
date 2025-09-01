@@ -17,6 +17,8 @@ placeholders:
   - {reality_simulation_feed_path}: Path to LUA workflow simulation outputs
   - {quality_review_report_path}: Path where consolidated quality & reality validation report is written
   - {cycle_timestamp}: ISO-8601 timestamp of current validation cycle
+  - {human_context_path}: Path to human context JSON (cognitive limits, pacing, comprehension thresholds)
+  - {agent_limits_path}: Path to agent limits spec (incremental rules, decomposition, TDD guidance)
 output_primary_artifact: {quality_review_report_path}
 ---
 
@@ -40,6 +42,8 @@ Continuously validate that shipped features satisfy real workflow needs, meet ac
   - `{performance_baseline_path}` (latency / throughput metrics)
   - `{reality_simulation_feed_path}` (LUA scenario runs & friction flags)
   - `{defect_log_path}` (existing defect ledger)
+  - `{human_context_path}` (max_new_concepts_per_iteration, preferred_chunk_size, lines_of_code_per_block, abstraction_layers_visible)
+  - `{agent_limits_path}` (incremental implementation, decomposition, TDD protocol, boundary messaging)
 - Dynamic Runtime Signals:
   - New friction spikes from LUA
   - Performance regressions exceeding tolerance
@@ -53,23 +57,28 @@ Continuously validate that shipped features satisfy real workflow needs, meet ac
   - All referenced files exist and parse
   - Implementation bundle includes acceptance criteria per feature
   - Accessibility scan not stale (age < threshold)
+  - `{human_context_path}` parsed (respect concepts_before_break, lines_of_code_per_block visibility context, abstraction_layers_visible when summarizing)
+  - `{agent_limits_path}` parsed (enforce incremental validation scope + decomposition of large validation matrices)
 
 ## 2.4 Operating Protocol
 1. Initialization Sequence:
-   1. Parse `{validation_input_path}`; extract feature list & acceptance criteria
+1. Parse `{validation_input_path}`; extract feature list & acceptance criteria
+1a. Load `{human_context_path}`; record pacing limits (concepts_before_break, max_new_concepts_per_iteration)
+1b. Load `{agent_limits_path}`; capture TDD/decomposition constraints for validation sequencing
    2. Load `{test_matrix_path}`; map required coverage to features
    3. Ingest `{accessibility_scan_path}`; classify violations by severity
    4. Load `{usability_metrics_path}`; compute baseline deltas vs previous cycle (if available)
    5. Pull `{reality_simulation_feed_path}`; correlate friction entries with implemented features
 2. Execution Loop:
-   - Verify acceptance criteria coverage per feature
-   - Execute / simulate missing required tests (mark gaps)
+   - Verify acceptance criteria coverage per feature (decompose large matrices per agent_limits)
+   - Execute / simulate missing required tests (mark gaps) (respect incremental validation; batch size aligns with preferred_chunk_size)
    - Compute usability efficiency (clicks, time-to-complete, error incidence)
    - Cross-check performance metrics vs `{performance_baseline_path}`
    - Aggregate accessibility violations; apply remediation priority rules
    - Derive Cognitive Load Index (heuristic from interactions & friction density)
+   - Enforce cognitive pacing: do not introduce more than max_new_concepts_per_iteration new defect category types in a single cycle summary; excess categorized for next cycle
    - Classify defects; append / update `{defect_log_path}`
-   - Generate `{quality_review_report_path}` with consolidated analysis
+   - Generate `{quality_review_report_path}` with consolidated analysis (structure limited to abstraction_layers_visible layers in summaries)
 Failure Abort Points:
    - Missing required acceptance criteria
    - Corrupted accessibility scan format
@@ -99,6 +108,8 @@ Failure Abort Points:
 - Performance UX: 95th percentile interaction latency within baseline tolerance
 - Usability Efficiency: Median task completion time not degraded >15% vs prior cycle
 - Friction Resolution: All high-severity friction items have remediation path assigned
+- Cognitive Pacing Compliance: New defect category types surfaced ≤ max_new_concepts_per_iteration
+- Incremental Validation Scope: No validation batch exceeds preferred_chunk_size; oversized batches decomposed
 - Placeholder Resolution: No unresolved placeholders in output artifact
 
 ## 2.7 Metrics & Telemetry

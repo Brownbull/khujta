@@ -33,6 +33,7 @@ Sources synchronized with: `evolved_agents.md`, `agents-workflow.md`, `daily-flo
 | Accessibility Compliance Gate | QRA | MAKA (remediation) | Architecture risk scoring |
 | Cognitive Load Index | LUA (raw heuristics) | QRA (interpretation) | Implementation strategy |
 | Risk & Drift Escalation | SYRA | VIVA (business trade-offs) | UX micro-adjustments |
+| Human-Aware Pacing & Decomposition Governance | Distributed (see Section 12) | VIVA (value framing), SYRA (arch batch), MAKA (slice/function), QRA (validation scope), LUA (scenario pacing) | Not a single centralized owner; each domain enforces locally |
 
 ---
 
@@ -155,3 +156,33 @@ Any modification to an agent's primary artifact contract or quality gate require
 2. Update relevant matrix rows here
 3. Re-run consistency checklist
 4. Record delta in future `CHANGELOG` (planned)
+
+## 12. Human-Aware Constraint Enforcement Matrix
+
+| Constraint Aspect | Source (human_context / agent_limits) | Primary Enforcer | Secondary / Observer | Enforcement Point |
+|-------------------|----------------------------------------|------------------|----------------------|-------------------|
+| New Concept Pacing (max_new_concepts_per_iteration) | human_context.max_new_concepts_per_iteration | VIVA (value mapping) | LUA (scenario types), QRA (defect category introduction) | Spec generation / scenario & defect categorization |
+| Preferred Chunk Size (preferred_chunk_size) | human_context.preferred_chunk_size | MAKA (implementation slices) | LUA (scenario batch), QRA (validation scope), SYRA (architecture change batches) | Task decomposition / batch selection |
+| Concepts Before Break (concepts_before_break) | human_context.concepts_before_break | LUA (micro-break insertion) | MAKA (pair-programming cadence), QRA (test grouping) | Execution loop pacing |
+| Function / Unit Size Limit | agent_limits.function_size_lines | MAKA | QRA (review), SYRA (architectural feedback) | Code authoring / review gate |
+| Architectural Evolution Batch Size | agent_limits.architecture_batch_units | SYRA | VIVA (priority), MAKA (feasibility) | Architecture refactor planning |
+| Incremental Validation Scope | agent_limits.validation_batch_units | QRA | LUA (coverage realism) | Test execution / quality gate |
+| Scenario Batch Size | human_context.preferred_chunk_size + agent_limits.scenario_batch_rules | LUA | QRA (coverage), VIVA (focus weighting) | Simulation batch builder |
+| Decomposition Strategy Enforcement | agent_limits.decomposition_rules | MAKA | SYRA (alignment), VIVA (value slices) | Pre-implementation planning |
+| Cognitive Load Index Interpretation | human_context + runtime telemetry | QRA | LUA (raw heuristics), VIVA (value reprioritization) | Post-execution analysis |
+| Pacing Violation Escalation | Derived (any pacing breach) | Originating agent | VIVA (reprioritize), Human Oversight (if repeated) | Immediate escalation channel |
+
+### 12.1 Integration Notes
+- All five agent specs include `{human_context_path}` and `{agent_limits_path}` placeholders (consistency OK).
+- Enforcement is federated; no single meta-controller to avoid bottlenecks.
+- Each enforcement action must emit a deterministic log entry referencing the applied thresholds.
+
+### 12.2 Checklist Additions
+Add to Section 8 Consistency Verification (implicit):
+| human_context & agent_limits placeholders present in all agent specs | OK |
+
+### 12.3 Escalation Extensions
+- Repeated pacing violations (>2 consecutive cycles) → escalate to Human Oversight for potential threshold recalibration.
+- Conflicting decomposition interpretations (MAKA vs SYRA) → joint resolution session with VIVA arbitration.
+
+---

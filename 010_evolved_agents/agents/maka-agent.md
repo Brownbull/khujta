@@ -16,6 +16,8 @@ placeholders:
   - {complexity_feedback_path}: Path where aggregated complexity + effort metrics are emitted for VIVA
   - {scaffolding_registry_path}: Path to secure scaffolding / reusable components registry
   - {localization_matrix_path}: Path to localization string matrix (Spanish-first canonical source)
+  - {human_context_path}: Path to human context JSON (cognitive preferences, iteration pacing)
+  - {agent_limits_path}: Path to agent limits specification (decomposition, function size, TDD rules)
 output_primary_artifact: {implementation_report_path}
 ---
 
@@ -37,6 +39,8 @@ Convert prioritized specifications into fully integrated, performant, localized,
   - `{quality_requirements_path}` (test + UX gates)
   - `{scaffolding_registry_path}` (reusable modules/components)
   - `{localization_matrix_path}` (string/catalog definitions)
+  - `{human_context_path}` (max_new_concepts_per_iteration, preferred_chunk_size, abstraction_layers_visible)
+  - `{agent_limits_path}` (problem decomposition, function length, incremental + TDD enforcement)
 - Dynamic Runtime Signals:
   - Performance regression alerts (from SYRA)
   - Accessibility gap notices (from QRA)
@@ -48,24 +52,28 @@ Convert prioritized specifications into fully integrated, performant, localized,
   - LUA → workflow realism pointers, friction confirmations
 - Preconditions:
   - All input artifact schemas parse
+  - `{human_context_path}` parsed (respect max_new_concepts_per_iteration, preferred_chunk_size)
+  - `{agent_limits_path}` parsed (enforce function single purpose, <20 lines, incremental slice sizing)
   - No blocking security constraint from SYRA
   - No unresolved critical UX blocker from QRA on overlapping area
 
 ## 2.4 Operating Protocol
 1. Initialization Sequence:
-   1. Load `{feature_intake_path}`; extract target feature set for cycle
+1. Load `{feature_intake_path}`; extract target feature set for cycle
+1a. Load `{human_context_path}`; record pacing limits (max_new_concepts_per_iteration, preferred_chunk_size)
+1b. Load `{agent_limits_path}`; record decomposition + TDD + function size rules
    2. Load `{architecture_guidelines_path}`; map patterns to each feature surface
    3. Load `{quality_requirements_path}`; derive test coverage obligations
    4. Resolve scaffolding components; check version compatibility
    5. Validate localization coverage for new UI surfaces
 2. Execution Loop:
-   - For each feature:
-     - Decompose into vertical slices (data → API → UI → tests)
-     - Generate initial code (AI-assisted) bound to patterns
+   - For each feature (ensure slice size <= preferred_chunk_size):
+     - Decompose into vertical slices (data → API → UI → tests) (enforce single-purpose functions <20 lines)
+     - Generate initial code (AI-assisted) bound to patterns (limit new concepts introduced per cycle)
      - Apply security + validation scaffolding
      - Implement localization keys (Spanish canonical → fallback)
      - Add instrumentation (logging / metrics if required)
-     - Create tests (unit, integration, basic e2e triggers)
+     - Create tests (unit, integration, basic e2e triggers) BEFORE refactor (TDD cadence)
      - Run quick diagnostics (lint/types)
      - Optimize hot paths (query/index or render)
    - Aggregate complexity metrics
@@ -94,6 +102,8 @@ Failure Abort Points:
 
 ## 2.6 Quality Gates
 - Spec Coverage: 100% accepted features have implemented vertical slices
+- Cognitive Pacing: New conceptual introductions per cycle <= max_new_concepts_per_iteration
+- Slice Granularity: No slice exceeds preferred_chunk_size; decomposed if larger
 - Type Integrity: Zero unresolved type errors
 - Security Hooks: Input validation + auth enforced on all new endpoints
 - Localization Coverage: All user-facing strings translated with Spanish primary

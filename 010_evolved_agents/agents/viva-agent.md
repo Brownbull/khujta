@@ -13,6 +13,8 @@ placeholders:
   - {value_map_path}: Path where updated value map artifact is written
   - {cycle_timestamp}: ISO-8601 timestamp of current prioritization pass
   - {previous_value_map_path}: Path to last committed value map (for diffing)
+  - {human_context_path}: Path to human context JSON guiding cognitive & iteration preferences
+  - {agent_limits_path}: Path to agent limits specification (decomposition, TDD, boundary messaging)
 output_primary_artifact: {value_map_path}
 ---
 
@@ -33,6 +35,8 @@ Continuously convert real user pain and system feedback into a ranked, value-jus
   - System performance summaries (optional SYRA performance exports)
   - Previous committed value map (`{previous_value_map_path}`)
   - Backlog registry (`{backlog_registry_path}`)
+  - `{human_context_path}` (cognitive preferences: max new concepts, chunk size, iteration style)
+  - `{agent_limits_path}` (constraints: incremental delivery, decomposition, TDD cadence, boundary messaging patterns)
 - Dynamic Runtime Signals:
   - Emerging friction severity deltas
   - Adoption decay or acceleration indicators
@@ -44,18 +48,24 @@ Continuously convert real user pain and system feedback into a ranked, value-jus
   - MAKA → Implementation velocity, complexity feedback
 - Preconditions:
   - `{feedback_signals_path}` exists and parseable
+  - `{human_context_path}` parsed; respect max_new_concepts_per_iteration & preferred_chunk_size
+  - `{agent_limits_path}` parsed; enforce incremental scope & problem decomposition rules
   - No blocking compliance alert flagged critical by SYRA
   - Backlog registry integrity hash (if implemented) validates
 
 ## 2.4 Operating Protocol
 1. Initialization Sequence:
-   1. Load `{feedback_signals_path}`; validate schema
+1. Load `{feedback_signals_path}`; validate schema
+1a. Load `{human_context_path}`; extract limits (max_new_concepts_per_iteration, preferred_chunk_size, iteration strategy)
+1b. Load `{agent_limits_path}`; load decomposition & TDD enforcement rules
    2. Load backlog registry; verify no structural corruption
    3. Load previous value map (if exists) for delta analysis
    4. Aggregate signal weights → construct scoring matrix
    5. Validate mandatory acceptance criteria presence for existing top items
 2. Execution Loop:
    - Compute base value score = (User Impact * Weight_u) + (Adoption Momentum * Weight_a) + (Friction Severity * Weight_f) + (Strategic Alignment * Weight_s) - (Complexity * Weight_c) - (Risk * Weight_r)
+   - Enforce human cognitive pacing: limit introduction of new conceptual categories per cycle to <= max_new_concepts_per_iteration
+   - If backlog change would exceed preferred_chunk_size, segment into smaller value slices before ranking
    - Apply compliance or critical risk elevation rules
    - Detect priority churn (excessive reordering > threshold)
    - Produce updated ranked set with justifications
@@ -86,7 +96,9 @@ Failure Abort Points:
 ## 2.6 Quality Gates
 - Input Integrity: All required files exist and parse without schema violations (PASS if zero schema errors)
 - Score Determinism: Same inputs produce identical ordering (PASS if hash(current_ranking)==hash(recompute))
+- Human Cognitive Pacing: New conceptual categories introduced <= max_new_concepts_per_iteration
 - Churn Control: Reordered top 10 items <= 40% unless justified (PASS if within limit or annotated)
+- Incremental Scope Integrity: No feature spec exceeds preferred_chunk_size without decomposition per agent limits
 - Justification Completeness: 100% ranked items have value rationale + acceptance criteria
 - Conflict Detection: No mutually exclusive items simultaneously top-ranked
 - Placeholder Resolution: All placeholders in output artifact resolved (no braces remain)

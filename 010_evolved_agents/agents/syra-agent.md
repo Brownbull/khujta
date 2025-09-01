@@ -16,6 +16,8 @@ placeholders:
   - {architecture_alignment_report_path}: Path where updated alignment & evolution report is written
   - {cycle_timestamp}: ISO-8601 timestamp of current architecture evaluation cycle
   - {risk_register_path}: Path to shared risk register for cross-agent visibility
+  - {human_context_path}: Path to human context JSON (cognitive & comprehension thresholds)
+  - {agent_limits_path}: Path to agent limits spec (decomposition, function size, incremental rules)
 output_primary_artifact: {architecture_alignment_report_path}
 ---
 
@@ -38,6 +40,8 @@ Continuously validate, evolve, and harden system architecture ensuring secure-by
   - `{performance_baseline_path}` (previous cycle benchmark summary)
   - `{deployment_pipeline_manifest_path}` (CI/CD definition)
   - `{risk_register_path}` (open technical risk entries)
+  - `{human_context_path}` (abstraction limits, iteration style, comprehension thresholds)
+  - `{agent_limits_path}` (incremental change, decomposition, function size guardrails)
 - Dynamic Runtime Signals:
   - Latency spikes
   - Error rate anomalies
@@ -53,10 +57,14 @@ Continuously validate, evolve, and harden system architecture ensuring secure-by
   - Security findings not stale (age < defined TTL)
   - Pipeline manifest integrity verification passed (hash or signature)
   - Architecture registry present and internally consistent
+  - `{human_context_path}` parsed (respect abstraction_layers_visible & concepts_before_break)
+  - `{agent_limits_path}` parsed (enforce incremental evolution batch sizing)
 
 ## 2.4 Operating Protocol
 1. Initialization Sequence:
-   1. Load `{architecture_registry_path}`; validate component linkage consistency
+1. Load `{architecture_registry_path}`; validate component linkage consistency
+1a. Load `{human_context_path}`; extract abstraction_layers_visible, concepts_before_break
+1b. Load `{agent_limits_path}`; load incremental & decomposition constraints
    2. Ingest `{infra_metrics_path}`; compute rolling deltas vs `{performance_baseline_path}`
    3. Parse `{security_findings_path}`; classify severity distribution
    4. Validate pipeline manifest structure + required stages
@@ -69,6 +77,7 @@ Continuously validate, evolve, and harden system architecture ensuring secure-by
    - Assess deployment pipeline completeness & failure modes
    - Reconcile upcoming feature load (from VIVA) with capacity envelopes
    - Generate evolution actions (refactor, re-segment, add caching, adjust IaC)
+   - Segment large architectural adjustments to honor incremental limits (agent_limits) and abstraction_layers_visible
    - Validate proposed actions against risk register (avoid duplication)
    - Write `{architecture_alignment_report_path}`
    - Persist updated performance baseline if thresholds improved
@@ -100,6 +109,8 @@ Failure Abort Points:
 - Performance Stability: 95th percentile latency within target envelope (PASS if ≤ agreed threshold)
 - Drift Control: Architecture drift items all categorized & prioritized
 - Deployment Readiness: Pipeline manifest includes build, test, security scan, deploy, rollback
+- Human Comprehension Formatting: Architecture changes summarized within abstraction_layers_visible tiers
+- Incremental Evolution Batch Size: No single action bundle exceeds decomposition guidance (agent_limits)
 - Observability Coverage: 100% critical components instrumented (metric + log + trace)
 - Placeholder Resolution: No unresolved placeholders in output artifact
 
